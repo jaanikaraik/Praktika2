@@ -5,15 +5,66 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Hello World!</title>
+    <script src="script.js"></script>
+    <title>Tark Lift</title>
+    
   </head>
   <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
+    <div class="container">
+      <div class="row">
+        <div class="col-4">
+          <h2>Collected pictures</h2>
+          <div class="images">
+            <img src="predicted_raw_collection/37/2020-03-02T08_47_51.441581.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">  
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+    
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+    
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+            <img src="näidispilt.jpg" alt="pilt">
+          </div>
+          
+  
+        </div>
+        <div class="col-3">
+          
+          <div class="buttons">
+            <h2 id="person"></h2>
+            <button type="button" class="btn btn-secondary" onclick="previousPerson()">PREVIOUS</button>
+            <button type="button" class="btn btn-secondary" onclick="nextPerson()">NEXT</button>
+            <button type="button" class="btn btn-info">SELECT</button>
+            <button type="button" class="btn btn-success">YES</button>
+            <button type="button" class="btn btn-danger">NO</button>
+            <button type="button" class="btn btn-warning">DONE</button>
+          </div>
+          
+        </div>
+        <div class="col-5">
+          <h2>Database pictures</h2>
+  
+          <div class="images" id="database_people">
+            
+          </div>
+  
+        </div>
+      </div>
+    </div>
+  
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 
-    <!-- You can also require other files to run in this process -->
-    <script src="./renderer.js"></script>
   </body>
 </html>
