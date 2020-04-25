@@ -9,6 +9,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
         console.log(`Received ${data} from main process`);
         // TODO: FINISH THIS
         let resultObject = JSON.parse(data);
+        let transferArray = resultObject["transferArray"];
+        for (let element of transferArray) {
+            console.log(element);
+            addPicture(element);
+        }
     });
 });
 function btnPressRequestFolders() {

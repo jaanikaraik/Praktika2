@@ -4,6 +4,7 @@ const path = require('path')
 const fs = require('fs')
 const { readdir, stat } = require("fs").promises
 const { join } = require('path')
+const { platform } = require('process');
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -32,9 +33,16 @@ function createWindow() {
       }
       console.log(`töötas ${files[0]}`);
       let pictures = files.filter(file => file.endsWith("jpg"));
-      let pictures2 = pictures.map(file => path.join(folderName, file))
+      let pictures2 = pictures.map(file => path.join(folderName, file));
+      var isWin = process.platform === "win32";
+      let pictures3;
+      if (isWin) {
+        pictures3 = pictures2.map(file => ".\\" + file.replace("\\\\","\\"));
+      } else {
+        pictures3 = pictures2.map(file => "./" + file);
+      }
       let transferObject = {};
-      transferObject["transferArray"] = pictures2;
+      transferObject["transferArray"] = pictures3;
       let transferJSON = JSON.stringify(transferObject);
       event.reply('sendFolderPictures', transferJSON);
     })
