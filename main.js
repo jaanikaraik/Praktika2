@@ -3,7 +3,7 @@ const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const { readdir, stat } = require("fs").promises
-const { join } = require("path")
+const { join } = require('path')
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -22,22 +22,42 @@ function createWindow() {
   mainWindow.openDevTools();
   const { ipcMain } = require('electron');
   var fileArray = [];
-  ipcMain.on('requestFolder', (event, arg) => {
-    fs.readdir(path.join(__dirname, "database_people", arg), function (err, files) {
+  ipcMain.on('requestFolderPictures', async (event, folderPath) => {
+    let folderPath1 = path.parse(folderPath);
+    console.log(`tere, ${folderPath}`)
+    let folderName = path.join("database_people", folderPath1.base);
+    await fs.readdir(folderPath, async function (err, files) {
       if (err) {
         console.err(err);
       }
-      console.log(files);
+      console.log(`töötas ${files[0]}`);
+      let pictures = files.filter(file => file.endsWith("jpg"));
+      let pictures2 = pictures.map(file => path.join(folderName, file))
+      let transferObject = {};
+      transferObject["transferArray"] = pictures2;
+      let transferJSON = JSON.stringify(transferObject);
+      event.reply('sendFolderPictures', transferJSON);
+    })
+  });
+
+  ipcMain.on('requestFolder', async (event, arg) => {
+    await fs.readdir(path.join(__dirname, "database_people"), function (err, files) {
+      if (err) {
+        console.err(err);
+      }
+      //console.log(files);
       files.forEach(element => {
         fileArray.push(element);
       });
       var arrayObject = { "files": fileArray };
       var reply = JSON.stringify(arrayObject);
-      console.log(reply);
+      //console.log(reply);
       event.reply('requestFolderResponse', reply);
     })
   });
+
   let databasePeoplePath = path.join(__dirname, "database_people");
+
   ipcMain.on('getAllFolders', async (event, arg) => {
     const dirs = async path => {
       let dirs = []
@@ -51,7 +71,7 @@ function createWindow() {
     }
     var arrayObject = { "files": await dirs() };
     var reply = JSON.stringify(arrayObject);
-    console.log(reply);
+    //console.log(reply);
     event.reply('getAllFoldersResult', reply);
 
   });

@@ -2,11 +2,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
     print("test")
     window.api.send("files", "what ever");
     window.api.receive("getAllFoldersResult", (data) => {
-        print(`Received ${data} from main process`);
+        //print(`Received ${data} from main process`);
         let resultObject = JSON.parse(data);
-
     });
-
+    window.api.receive("sendFolderPictures", (data) => {
+        console.log(`Received ${data} from main process`);
+        // TODO: FINISH THIS
+        let resultObject = JSON.parse(data);
+    });
 });
 function btnPressRequestFolders() {
 
@@ -49,9 +52,9 @@ function emptyDiv() {
     }
 }
 function choose(folderName) {
-    window.api.send("requestFolderPictures", "what ever");
+    window.api.send("requestFolderPictures", folderName);
+    console.log("choose function")
     window.api.receive("requestFolderResponse", (data) => {
-        print(`Received ${data} from main process`);
         let resultObject = JSON.parse(data);
 
     });
