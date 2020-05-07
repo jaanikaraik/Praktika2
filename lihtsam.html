@@ -5,12 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="script.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <img src=".\database_people\100\0.jpg" alt="">
-    <button onclick="btnPressRequestFolders()">Get all folders</button>
-    <div class="myList">
+    <div class="container">
+        <div class="row">
+            <div class="col-4">
+                <h2>Collected pictures</h2>
+                <img src=".\database_people\100\0.jpg" alt="">
+            </div>
+
+            <div class="col-3">
+                <div class="buttons">
+                    <h2 id="person"></h2>
+                    <button type="button" class="btn btn-secondary" onclick="previousPerson()">PREVIOUS</button>
+                    <button type="button" class="btn btn-secondary" onclick="nextPerson()">NEXT</button>
+                    <button type="button" class="btn btn-info">SELECT</button>
+                    <button type="button" class="btn btn-success">YES</button>
+                    <button type="button" class="btn btn-danger">NO</button>
+                    <button type="button" class="btn btn-warning">DONE</button>
+                </div>
+            </div>
+
+            <div class="col-5">
+                <h2>Database pictures</h2>
+                <div  class="images" id="database_people">
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="myPictures"></div>
+    
 </body>
 </html>

@@ -5,6 +5,9 @@ const fs = require('fs')
 const { readdir, stat } = require("fs").promises
 const { join } = require('path')
 const { platform } = require('process');
+
+let currentPath = "";
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -25,13 +28,13 @@ function createWindow() {
   var fileArray = [];
   ipcMain.on('requestFolderPictures', async (event, folderPath) => {
     let folderPath1 = path.parse(folderPath);
-    console.log(`tere, ${folderPath}`)
+    //console.log(`tere, ${folderPath}`)
     let folderName = path.join("database_people", folderPath1.base);
     await fs.readdir(folderPath, async function (err, files) {
       if (err) {
-        console.err(err);
+        console.error(err);
       }
-      console.log(`töötas ${files[0]}`);
+      //console.log(`töötas ${files[0]}`);
       let pictures = files.filter(file => file.endsWith("jpg"));
       let pictures2 = pictures.map(file => path.join(folderName, file));
       var isWin = process.platform === "win32";
@@ -51,15 +54,13 @@ function createWindow() {
   ipcMain.on('requestFolder', async (event, arg) => {
     await fs.readdir(path.join(__dirname, "database_people"), function (err, files) {
       if (err) {
-        console.err(err);
+        console.error(err);
       }
-      //console.log(files);
       files.forEach(element => {
         fileArray.push(element);
       });
       var arrayObject = { "files": fileArray };
       var reply = JSON.stringify(arrayObject);
-      //console.log(reply);
       event.reply('requestFolderResponse', reply);
     })
   });
@@ -77,10 +78,18 @@ function createWindow() {
       }
       return dirs
     }
-    var arrayObject = { "files": await dirs() };
-    var reply = JSON.stringify(arrayObject);
-    //console.log(reply);
+    let directories = await dirs();
+    if(directories.length < 1){
+      console.error("No directories were found.");
+    } else {
+      console.log(`${directories.length} directories were found.`)
+    }
+    //console.log(`directories=${directories}`);
+    let arrayObject = { files: directories };
+    let reply = JSON.stringify(arrayObject);
+    console.log(reply.substring(0,200).replace("C:\\Users\\jaanikaraik\\projects\\", ""));
     event.reply('getAllFoldersResult', reply);
+    console.log(`Directories sent.`)
 
   });
 
