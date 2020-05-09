@@ -7,7 +7,13 @@ const { join } = require('path')
 const { platform } = require('process');
 
 let currentPath = "";
-
+function logHelper(name, value) {
+  console.log(`${name}, type=${typeof (value)}, value=${value}`);
+  if(typeof(value) === "object" && value !== null){
+      // get properties of object
+      console.log(`||||, properties: ${Object.getOwnPropertyNames(value)}`)
+  }
+}
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -26,27 +32,32 @@ function createWindow() {
   mainWindow.openDevTools();
   const { ipcMain } = require('electron');
   var fileArray = [];
-  ipcMain.on('requestFolderPictures', async (event, folderPath) => {
-    let folderPath1 = path.parse(folderPath);
-    //console.log(`tere, ${folderPath}`)
-    let folderName = path.join("database_people", folderPath1.base);
-    await fs.readdir(folderPath, async function (err, files) {
+  let allowedRootFolders = ["database_people", "predicted_raw_collection"];
+  ipcMain.on('requestFolderPictures', async (event, pictureSubfolderAbsolutePath, rootFolder) => {
+    console.log("requestFolderPictures message arrived, processing started");
+    logHelper("pictureSubfolderAbsolutePath", pictureSubfolderAbsolutePath);
+    logHelper("rootFolder", rootFolder);
+    if (!allowedRootFolders.includes(rootFolder)) {
+      throw "Client requesting wrong folder, security check.";
+    }
+    let folderRelativePath = path.join(rootFolder, path.parse(pictureSubfolderAbsolutePath).base);
+    logHelper("folderRelativePath", folderRelativePath);
+    await fs.readdir(path.join(pictureSubfolderAbsolutePath, "..", "..", rootFolder, path.parse(pictureSubfolderAbsolutePath).base), async function (err, files) {
       if (err) {
         console.error(err);
       }
-      //console.log(`töötas ${files[0]}`);
-      let pictures = files.filter(file => file.endsWith("jpg"));
-      let pictures2 = pictures.map(file => path.join(folderName, file));
+      let pictures = files.filter(file => file.endsWith("jpg"))
+      .map(file => path.join(folderRelativePath, file));
+      logHelper("files[0]",files[0]);
+      //kontrollitakse, mis platformiga on tegu ja kohandatakse vastavalt sellele kindlast kaustast algav kataloogitee
       var isWin = process.platform === "win32";
-      let pictures3;
       if (isWin) {
-        pictures3 = pictures2.map(file => ".\\" + file.replace("\\\\","\\"));
+        pictures = pictures.map(picture => ".\\" + picture.replace("\\\\","\\"));
       } else {
-        pictures3 = pictures2.map(file => "./" + file);
+        pictures = pictures.map(picture => "./" + picture);
       }
-      let transferObject = {};
-      transferObject["transferArray"] = pictures3;
-      let transferJSON = JSON.stringify(transferObject);
+      let transferJSON = JSON.stringify({transferArray: pictures});
+      console.log("requestFolderPictures message parsed, sending reply");
       event.reply('sendFolderPictures', transferJSON);
     })
   });
@@ -55,6 +66,7 @@ function createWindow() {
     await fs.readdir(path.join(__dirname, "database_people"), function (err, files) {
       if (err) {
         console.error(err);
+        return;
       }
       files.forEach(element => {
         fileArray.push(element);
@@ -66,26 +78,28 @@ function createWindow() {
   });
 
   let databasePeoplePath = path.join(__dirname, "database_people");
+  //uus
+  let databasePeoplePathRaw = path.join(__dirname, "predicted_raw_collection");
 
   ipcMain.on('getAllFolders', async (event, arg) => {
-    const dirs = async path => {
+    const dirs = async (path) => {
       let dirs = []
-      for (const file of await readdir(databasePeoplePath)) {
-        let fileLocation = join(databasePeoplePath, file);
+      for (const file of await readdir(path)) {
+        let fileLocation = join(path, file);
         if ((await stat(fileLocation)).isDirectory()) {
           dirs = [...dirs, fileLocation]
         }
       }
       return dirs
     }
-    let directories = await dirs();
+    let directories = await dirs(databasePeoplePath);
+    let directoriesRaw = await dirs(databasePeoplePathRaw);
     if(directories.length < 1){
       console.error("No directories were found.");
     } else {
       console.log(`${directories.length} directories were found.`)
     }
-    //console.log(`directories=${directories}`);
-    let arrayObject = { files: directories };
+    let arrayObject = { files: directories, filesRaw: directoriesRaw };
     let reply = JSON.stringify(arrayObject);
     console.log(reply.substring(0,200).replace("C:\\Users\\jaanikaraik\\projects\\", ""));
     event.reply('getAllFoldersResult', reply);

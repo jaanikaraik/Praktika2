@@ -12,18 +12,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             let allFoldersSorted = sortFolderNamesArray(allFolders1);
             //console.log(allFoldersSorted);
             currentFolder = allFoldersSorted[elementIndex];
-            choose(currentFolder, false);
-            print("test")
-            window.api.send("files", "what ever");
-            window.api.receive("sendFolderPictures", (data) => {
-                console.log(`Received ${data} from main process`);
-                let resultObject = JSON.parse(data);
-                let transferArray = resultObject["transferArray"];
-                for (let element of transferArray) {
-                    //console.log(element);
-                    addPicture(element);
-                }
-            });
+            choose(currentFolder.folderPath);
         } catch (err) {
             console.error(err);
         }
@@ -31,6 +20,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function getFolderNumber(folderName) {
+    //saame kätte kataloogi stringile vastava arvu
     console.log(`getFolderNumber(${folderName})`);
     let pattern = /\\([^\\]+)$/;
     let numberString = folderName.match(pattern);
@@ -39,7 +29,7 @@ function getFolderNumber(folderName) {
 }
 
 function sortFolderNamesArray(folderNamesArray) {
-
+    //kataloogid sorteeritakse numbrilises mitte tähestikulises järjekorras
     console.log(`sortFolderNamesArray(${folderNamesArray})`);
     if (!folderNamesArray) {
         throw "folderNamesArray does not exist.";
@@ -58,16 +48,18 @@ function sortFolderNamesArray(folderNamesArray) {
 }
 
 function nextPerson() {
+    //liigume järgmise idga inimese piltide juurde
     elementIndex += 1;
     currentFolder = allFolders1[elementIndex]
-    choose(currentFolder, true);
+    choose(currentFolder);
 }
 
 function previousPerson() {
+    //liigume eelmise idga inimese piltide juurde
     if (elementIndex >= 1) {
         elementIndex -= 1;
         currentFolder = allFolders1[elementIndex]
-        choose(currentFolder, true);
+        choose(currentFolder);
     }
 }
 
@@ -77,30 +69,46 @@ function print(text) {
     node.appendChild(textnode);                              // Append the text to <li>
     document.querySelector(".images").appendChild(node);
 }
-function addPicture(src) {
+function addPicture(src, styleClass) {
+    logHelper("styleClass", styleClass)
     var imageElement = document.createElement("img");                 // Create a <li> imageElement
     imageElement.setAttribute("src", src)
-    document.querySelector(".images").appendChild(imageElement);
+    document.querySelector(styleClass).appendChild(imageElement);
+}
+function logHelper(name, value) {
+    console.log(`${name}, type=${typeof (value)}, value=${value}`);
+    if (typeof (value) === "object" && value !== null) {
+        // get properties of object
+        console.log(`||||, properties: ${Object.getOwnPropertyNames(value)}`)
+    }
 }
 function emptyDiv() {
-    let myPictures = document.querySelector(".images");
-    var elements = myPictures.querySelectorAll("img");
-    while (elements.length > 0) {
-        elements[0].parentNode.removeChild(elements[0]);
-    }
+    const divNode = document.getElementById("database_people");
+    divNode.innerHTML = '';
+    //uus
+    const divNode2 = document.getElementById("predicted_raw_collection");
+    divNode2.innerHTML = '';
 }
-function choose(folderName, willDelete) {
-    if (willDelete) {
-        const myNode = document.getElementById("database_people");
-        myNode.innerHTML = '';
-    }
-    window.api.send("requestFolderPictures", folderName);
-    console.log("choose function")
-    window.api.receive("requestFolderResponse", (data) => {
+function choose(folderName) {
+    logHelper("folderName", folderName);
+    emptyDiv();
+    window.api.receiveOnce("sendFolderPictures", (data) => {
         let resultObject = JSON.parse(data);
         let picturesArray = resultObject["transferArray"];
         for (let pictureName of picturesArray) {
-            addPicture(pictureName)
+            addPicture(pictureName, ".images")
         }
+        window.api.receiveOnce("sendFolderPictures", (data) => {
+            let resultObject = JSON.parse(data);
+            let picturesArray = resultObject["transferArray"];
+            logHelper("picturesArray", picturesArray[0]);
+            for (let pictureName of picturesArray) {
+                addPicture(pictureName, ".images2")
+            }
+        });
+        window.api.send("requestFolderPictures", folderName, "predicted_raw_collection");
     });
+    window.api.send("requestFolderPictures", folderName, "database_people");
+
+
 }

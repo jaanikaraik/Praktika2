@@ -7,11 +7,18 @@ const {
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld(
     "api", {
-        send: (channel, data) => {
+        receiveOnce: (channel, func) => {
+            let validChannels = ["backfiles", "getAllFoldersResult", "sendFolderPictures"];
+            if (validChannels.includes(channel)) {
+                // Deliberately strip event as it includes `sender` 
+                ipcRenderer.once(channel, (event, ...args) => func(...args)); // :)
+            }
+        },
+        send: (channel, ...args) => {
             // whitelist channels
             let validChannels = ["files","getAllFolders", "requestFolderPictures", "sendFolderPictures"];
             if (validChannels.includes(channel)) {
-                ipcRenderer.send(channel, data);
+                ipcRenderer.send(channel, ...args);
             }
         },
         receive: (channel, func) => {

@@ -19,6 +19,19 @@ img {
     }
 }
 
+.images2 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    & > img {
+        flex: 0 30%;
+        width: 40px;
+        height: auto;
+        margin-top: 5px;
+    }
+}
+
 .buttons {
     display: flex;
     flex-direction: column;
