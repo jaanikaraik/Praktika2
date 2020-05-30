@@ -34,21 +34,28 @@ function createWindow() {
   var fileArray = [];
   let allowedRootFolders = ["database_people", "predicted_raw_collection"];
   ipcMain.on('requestFolderPictures', async (event, pictureSubfolderAbsolutePath, rootFolder) => {
-    console.log("requestFolderPictures message arrived, processing started");
-    logHelper("pictureSubfolderAbsolutePath", pictureSubfolderAbsolutePath);
-    logHelper("rootFolder", rootFolder);
+    //console.log("requestFolderPictures message arrived, processing started");
+    //logHelper("pictureSubfolderAbsolutePath", pictureSubfolderAbsolutePath);
+    //logHelper("rootFolder", rootFolder);
     if (!allowedRootFolders.includes(rootFolder)) {
       throw "Client requesting wrong folder, security check.";
     }
     let folderRelativePath = path.join(rootFolder, path.parse(pictureSubfolderAbsolutePath).base);
-    logHelper("folderRelativePath", folderRelativePath);
+    //logHelper("folderRelativePath", folderRelativePath);
     await fs.readdir(path.join(pictureSubfolderAbsolutePath, "..", "..", rootFolder, path.parse(pictureSubfolderAbsolutePath).base), async function (err, files) {
       if (err) {
         console.error(err);
       }
-      let pictures = files.filter(file => file.endsWith("jpg"))
-      .map(file => path.join(folderRelativePath, file));
-      logHelper("files[0]",files[0]);
+
+      let pictures = files.filter(file => file.endsWith("jpg")).sort(function(a, b){
+        let aNumber = parseInt(a);
+        let bNumber = parseInt(b);
+        let difference = aNumber - bNumber;
+        return difference;
+      });
+
+      pictures = pictures.map(file => path.join(folderRelativePath, file));
+      //logHelper("files[0]",files[0]);
       //kontrollitakse, mis platformiga on tegu ja kohandatakse vastavalt sellele kindlast kaustast algav kataloogitee
       var isWin = process.platform === "win32";
       if (isWin) {
@@ -57,11 +64,14 @@ function createWindow() {
         pictures = pictures.map(picture => "./" + picture);
       }
       let transferJSON = JSON.stringify({transferArray: pictures});
-      console.log("requestFolderPictures message parsed, sending reply");
+      //console.log("requestFolderPictures message parsed, sending reply");
       event.reply('sendFolderPictures', transferJSON);
     })
   });
-
+  ipcMain.on('sendFileName', async (event, arg) => {
+    //fs.write()
+    console.log(1);
+  });
   ipcMain.on('requestFolder', async (event, arg) => {
     await fs.readdir(path.join(__dirname, "database_people"), function (err, files) {
       if (err) {
@@ -94,16 +104,37 @@ function createWindow() {
     }
     let directories = await dirs(databasePeoplePath);
     let directoriesRaw = await dirs(databasePeoplePathRaw);
+
+    directories.sort(function(a, b){
+      a = path.parse(a).base;
+      b = path.parse(b).base;
+
+      let aNumber = parseInt(a);
+      let bNumber = parseInt(b);
+      let difference = aNumber - bNumber;
+      return difference;
+    });
+
+    directoriesRaw.sort(function(a, b){
+      a = path.parse(a).base;
+      b = path.parse(b).base;
+
+      let aNumber = parseInt(a);
+      let bNumber = parseInt(b);
+      let difference = aNumber - bNumber;
+      return difference;
+    });
+
     if(directories.length < 1){
       console.error("No directories were found.");
     } else {
-      console.log(`${directories.length} directories were found.`)
+      //console.log(`${directories.length} directories were found.`)
     }
     let arrayObject = { files: directories, filesRaw: directoriesRaw };
     let reply = JSON.stringify(arrayObject);
-    console.log(reply.substring(0,200).replace("C:\\Users\\jaanikaraik\\projects\\", ""));
+    //console.log(reply.substring(0,200).replace("C:\\Users\\jaanikaraik\\projects\\", ""));
     event.reply('getAllFoldersResult', reply);
-    console.log(`Directories sent.`)
+    //console.log(`Directories sent.`)
 
   });
 
@@ -131,3 +162,5 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+//valitud pildi kausta kirjutamine

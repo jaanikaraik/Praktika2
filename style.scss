@@ -32,6 +32,13 @@ img {
     }
 }
 
+.selected { 
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    width: 150px; 
+}
+
 .buttons {
     display: flex;
     flex-direction: column;
@@ -48,4 +55,9 @@ img {
         height: auto;
 
     }
+}
+
+.pressedButton {
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }

@@ -54,6 +54,13 @@ img {
   margin-top: 5px;
 }
 
+.selected {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 150px;
+}
+
 .buttons {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -81,5 +88,10 @@ img {
           flex: 0 100%;
   width: 190px;
   height: auto;
+}
+
+.pressedButton {
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 /*# sourceMappingURL=style.css.map */

@@ -11,12 +11,18 @@ contextBridge.exposeInMainWorld(
             let validChannels = ["backfiles", "getAllFoldersResult", "sendFolderPictures"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
-                ipcRenderer.once(channel, (event, ...args) => func(...args)); // :)
+                try {
+                    ipcRenderer.once(channel, (event, ...args) => func(...args)); // :)
+                } catch (err) {
+                    throw err;
+                }
+            } else {
+                console.error("Channel is not valid");
             }
         },
         send: (channel, ...args) => {
-            // whitelist channels
-            let validChannels = ["files","getAllFolders", "requestFolderPictures", "sendFolderPictures"];
+            // main'ile
+            let validChannels = ["files","getAllFolders", "requestFolderPictures", "sendFolderPictures", "sendFileName"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, ...args);
             }
