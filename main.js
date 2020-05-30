@@ -69,8 +69,12 @@ function createWindow() {
     })
   });
   ipcMain.on('sendFileName', async (event, arg) => {
-    //fs.write()
-    console.log(1);
+    fs.appendFile('selected_pictures.txt', arg, function (err) {
+      if (err) throw err;
+      console.log(err);
+    });
+    // replace ka tööle
+    
   });
   ipcMain.on('requestFolder', async (event, arg) => {
     await fs.readdir(path.join(__dirname, "database_people"), function (err, files) {
